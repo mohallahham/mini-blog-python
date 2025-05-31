@@ -1,0 +1,12 @@
+<h1>All Posts</h1>
+<a href="{% url 'create_blog' %}">Create New Blog</a> |
+<a href="{% url 'create_post' %}">Create New Post</a>
+<ul>
+  {% for post in posts %}
+  <li>
+    <strong>{{ post.title }}</strong> ({{ post.created_at }}) <br />
+    {{ post.content|linebreaks }} <br />
+    <a href="{% url 'edit_post' post.pk %}">Edit Post</a>
+  </li>
+  {% endfor %}
+</ul>
