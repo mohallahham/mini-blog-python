@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponseForbidden
+
 
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -12,7 +14,7 @@ from .forms import BlogForm, PostForm, UserRegisterForm
 
 
 def home(request):
-    posts = Post.objects.all().order_by("-created_at")
+    posts = Post.objects.all().order_by("-created_at")  # 👈 Show ALL posts
     return render(request, "blogs/home.html", {"posts": posts})
 
 
@@ -21,12 +23,12 @@ def create_blog(request):
     if request.method == "POST":
         form = BlogForm(request.POST)
         if form.is_valid():
-            form.save()
+            blog = form.save(commit=False)
+            blog.owner = request.user
+            blog.save()
             return redirect("home")
-
     else:
         form = BlogForm()
-
     return render(request, "blogs/create_blog.html", {"form": form})
 
 
@@ -35,7 +37,9 @@ def create_post(request):
     if request.method == "POST":
         form = PostForm(request.POST)
         if form.is_valid():
-            form.save()
+            post = form.save(commit=False)
+            post.author = request.user
+            post.save()
             return redirect("home")
     else:
         form = PostForm()
@@ -45,6 +49,10 @@ def create_post(request):
 @login_required
 def edit_post(request, pk):
     post = get_object_or_404(Post, pk=pk)
+
+    if post.author != request.user:  # 👈 Check the Post author now
+        return HttpResponseForbidden("You are not allowed to edit this post.")
+
     if request.method == "POST":
         form = PostForm(request.POST, instance=post)
         if form.is_valid():
