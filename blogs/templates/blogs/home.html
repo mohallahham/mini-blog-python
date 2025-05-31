@@ -20,6 +20,7 @@
   {% for post in posts %}
   <li>
     <strong>{{ post.title }}</strong> ({{ post.created_at }}) <br />
+    <em>By {{ post.author.username }}</em> <br />
     {{ post.content|linebreaks }} <br />
     <a href="{% url 'edit_post' post.pk %}">Edit Post</a>
   </li>
